@@ -137,7 +137,7 @@ runs:
       id: images_to_verify
       shell: bash
       run: |
-        ublue_images=$(buildah images | tail -n +2 | grep -v localhost | awk '{print $1}' | grep '^ghcr.io/ublue-os')
+        ublue_images=$(buildah images | tail -n +2 | grep -v localhost | awk '{print $1}' | grep '^ghcr.io/ublue-os' | tr '\n' ' ')
 
         echo "ublue_images=${ublue_images}" >> $GITHUB_OUTPUT
 
