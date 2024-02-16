@@ -48,9 +48,9 @@ runs:
       run: |
         if [[ "${{ inputs.image_variant }}" == "main" ]]
         then
-            echo "IMAGE_NAME=${{ inputs.image_name }}" >> $GITHUB_ENV
+            echo "image_name=${{ inputs.image_name }}" >> $GITHUB_ENV
         else
-            echo "IMAGE_NAME=${{ format('{0}-{1}', inputs.image_name, inputs.image_variant) }}" >> $GITHUB_ENV
+            echo "image_name=${{ format('{0}-{1}', inputs.image_name, inputs.image_variant) }}" >> $GITHUB_ENV
         fi
 
     - name: Generate tags
@@ -101,9 +101,9 @@ runs:
       id: meta
       with:
         images: |
-          ${{ inputs.image_name }}
+          ${{ steps.generate-name.outputs.image_name }}
         labels: |
-          org.opencontainers.image.title=${{ inputs.image_name }}
+          org.opencontainers.image.title=${{ steps.generate-name.outputs.image_name }}
           org.opencontainers.image.version=${{ inputs.version }}
           org.opencontainers.image.description=An interpretation of the Ubuntu spirit built on Fedora technology 
           io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
@@ -116,9 +116,7 @@ runs:
       with:
         containerfiles: |
           ./Containerfile
-        image: ${{ env.IMAGE_NAME }}
-        tags: |
-          ${{ steps.generate-tags.outputs.tags }}
+        image: ${{ steps.generate-name.outputs.image_name }}
         build-args: |
           IMAGE_NAME=${{ inputs.image_name }}
           IMAGE_FLAVOR=${{ inputs.image_variant }}
@@ -163,7 +161,7 @@ runs:
         REGISTRY_PASSWORD: ${{ github.token }}
       with:
         image: ${{ steps.build_image.outputs.image }}
-        tags: ${{ steps.build_image.outputs.tags }}
+        tags: ${{ steps.generate-tags.outputs.tags }}
         registry: ${{ steps.registry_case.outputs.lowercase }}
         username: ${{ env.REGISTRY_USER }}
         password: ${{ env.REGISTRY_PASSWORD }}
