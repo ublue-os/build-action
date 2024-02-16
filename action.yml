@@ -48,9 +48,12 @@ runs:
       run: |
         if [[ "${{ inputs.image_variant }}" == "main" ]]
         then
-            echo "image_name=${{ inputs.image_name }}" >> $GITHUB_ENV
+          echo "image_name=${{ inputs.image_name }}" >> $GITHUB_ENV
+        elif [[ "${{ inputs.image_variant }}" =~ "main-*" ]]
+          variant=${{ inputs.image_variant }}
+          echo "image_name=${{ inputs.image_name }}-${variant:5}" >> $GITHUB_ENV
         else
-            echo "image_name=${{ format('{0}-{1}', inputs.image_name, inputs.image_variant) }}" >> $GITHUB_ENV
+          echo "image_name=${{ format('{0}-{1}', inputs.image_name, inputs.image_variant) }}" >> $GITHUB_ENV
         fi
 
     - name: Generate tags
