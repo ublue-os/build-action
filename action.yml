@@ -50,6 +50,7 @@ runs:
         then
           echo "image_name=${{ inputs.image_name }}" >> $GITHUB_ENV
         elif [[ "${{ inputs.image_variant }}" =~ "main-*" ]]
+        then
           variant=${{ inputs.image_variant }}
           echo "image_name=${{ inputs.image_name }}-${variant:5}" >> $GITHUB_ENV
         else
