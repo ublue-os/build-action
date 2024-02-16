@@ -19,12 +19,24 @@ inputs:
   signing_key:
     description: key to sign images
     required: true
+  container_repo:
+    description: repository for the container image
+    required: false
+    default: ${{ github.repository }}
+  container_ref:
+    description: repository ref for the container image
+    required: false
+    default: ${{ github.ref }}
 
 runs:
   using: "composite"
   steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.container_repo }}
+        ref: ${{ inputs.container_ref }}
+        submodules: recursive
 
     - name: Free disk space (Ubuntu)
       uses: jlumbroso/free-disk-space@v1.3.1

@@ -1,0 +1,125 @@
+name: Test container workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-main-build:
+    name: Build uBlue-OS Main
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - silverblue
+          - kinoite
+          - sericea
+          - onyx
+          - base
+          - lxqt
+          - lazurite
+          - mate
+          - vauxite
+        major_version:
+          - 39
+        image_variant: 
+          - nokmods
+        include:
+          - major_version: 39
+            support: latest
+          - major_version: 38
+            support: gts
+        exclude:
+          # There is no Fedora 39 version of lxqt as it was replaced by lazurite
+          - image_name: lxqt
+            major_version: 39
+    steps:
+      - name: Build image
+        uses: ${{ github.repo }}@${{ github.ref }}
+        with:
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          container_repo: ublue-os/main
+          container_ref: main
+
+      - uses: actions/delete-package-versions@v4
+        with: 
+          package-name: ${{ matrix.image_name }}
+          package-type: 'container'
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: 'false'
+
+      - uses: actions/delete-package-versions@v4
+        with: 
+          package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
+          package-type: 'container'
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: 'false'
+
+  run-bluefin-build:
+    name: Build uBlue-OS Bluefin
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image_name:
+          - bluefin
+          - bluefin-dx
+        major_version:
+          - 39
+        image_variant:
+          - main
+          - nvidia
+          - asus
+          - asus-nvidia
+          - framework
+          - surface
+          - surface-nvidia
+        include:
+          - major_version: 39
+            support: latest
+          - major_version: 38
+            support: gts
+        exclude:
+          # There is no Fedora 39 version of lxqt as it was replaced by lazurite
+          - image_name: lxqt
+            major_version: 39
+    steps:
+      - name: Build image
+        uses: ${{ github.repo }}@${{ github.ref }}
+        with:
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          container_repo: ublue-os/bluefin
+          container_ref: main
+      
+      - uses: actions/delete-package-versions@v4
+        with: 
+          package-name: ${{ matrix.image_name }}
+          package-type: 'container'
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: 'false'
+
+      - uses: actions/delete-package-versions@v4
+        with: 
+          package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
+          package-type: 'container'
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: 'false'
