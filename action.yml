@@ -128,25 +128,23 @@ runs:
     # Build image using Buildah action
     - name: Build Image
       id: build_image
-      uses: Wandalen/wretry.action@v1.4.4
+      uses: redhat-actions/buildah-build@v2
       with:
-        action: redhat-actions/buildah-build@v2
-        with: |
-          containerfiles: |
-            ./Containerfile
-          image: ${{ steps.generate-name.outputs.image_name }}
-          tags: ${{ steps.generate-tags.outputs.tags }}
-          build-args: |
-            IMAGE_NAME=${{ inputs.image_name }}
-            IMAGE_FLAVOR=${{ inputs.image_variant }}
-            IMAGE_VENDOR=${{ github.repository_owner }}
-            FEDORA_MAJOR_VERSION=${{ inputs.version }}
-            TARGET_BASE=${{ inputs.image_variant }}
-          labels: ${{ steps.meta.outputs.labels }}
-          oci: false
-          #TODO: SPLIT Containerfiles
-          extra-args: |
-            --target=${{ inputs.image_name }}
+        containerfiles: |
+          ./Containerfile
+        image: ${{ steps.generate-name.outputs.image_name }}
+        tags: ${{ steps.generate-tags.outputs.tags }}
+        build-args: |
+          IMAGE_NAME=${{ inputs.image_name }}
+          IMAGE_FLAVOR=${{ inputs.image_variant }}
+          IMAGE_VENDOR=${{ github.repository_owner }}
+          FEDORA_MAJOR_VERSION=${{ inputs.version }}
+          TARGET_BASE=${{ inputs.image_variant }}
+        labels: ${{ steps.meta.outputs.labels }}
+        oci: false
+        #TODO: SPLIT Containerfiles
+        extra-args: |
+          --target=${{ inputs.image_name }}
 
     - name: Get list of images to verify
       id: images_to_verify
@@ -177,15 +175,13 @@ runs:
       env:
         REGISTRY_USER: ${{ github.actor }}
         REGISTRY_PASSWORD: ${{ github.token }}
-      uses: Wandalen/wretry.action@v1.4.4
+      uses: redhat-actions/push-to-registry@v2
       with:
-        action: redhat-actions/push-to-registry@v2
-        with: |
-          image: ${{ steps.build_image.outputs.image }}
-          tags: ${{ steps.generate-tags.outputs.tags }}
-          registry: ${{ steps.registry_case.outputs.lowercase }}
-          username: ${{ env.REGISTRY_USER }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+        image: ${{ steps.build_image.outputs.image }}
+        tags: ${{ steps.generate-tags.outputs.tags }}
+        registry: ${{ steps.registry_case.outputs.lowercase }}
+        username: ${{ env.REGISTRY_USER }}
+        password: ${{ env.REGISTRY_PASSWORD }}
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
