@@ -16,6 +16,7 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
+      max-parallel: 5
       matrix:
         image_name:
           - silverblue
@@ -50,6 +51,7 @@ jobs:
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
           target: ${{ matrix.image_variant }}
+          container_registry: ghcr.io/${{ github.repo }}
           container_repo: ublue-os/main
           container_ref: main
 
@@ -57,7 +59,7 @@ jobs:
         if: matrix.image_variant == 'main'
         uses: actions/delete-package-versions@v4
         with: 
-          package-name: ${{ matrix.image_name }}
+          package-name: ${{ github.event.repository.name }}/${{ matrix.image_name }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'
@@ -66,7 +68,7 @@ jobs:
         if: matrix.image_variant != 'main'
         uses: actions/delete-package-versions@v4
         with: 
-          package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
+          package-name: ${{ github.event.repository.name }}/${{ matrix.image_name }}-${{ matrix.image_variant }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'
@@ -80,7 +82,7 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
-      max-parallel: 10
+      max-parallel: 5
       matrix:
         image_name:
           - bluefin
@@ -114,6 +116,7 @@ jobs:
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
           target: ${{ matrix.image_name }}
+          container_registry: ghcr.io/${{ github.repo }}
           container_repo: ublue-os/bluefin
           container_ref: main
       
@@ -121,7 +124,7 @@ jobs:
         if: matrix.image_variant == 'main'
         uses: actions/delete-package-versions@v4
         with: 
-          package-name: ${{ matrix.image_name }}
+          package-name: ${{ github.event.repository.name }}/${{ matrix.image_name }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'
@@ -130,7 +133,7 @@ jobs:
         if: matrix.image_variant != 'main'
         uses: actions/delete-package-versions@v4
         with: 
-          package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
+          package-name: ${{ github.event.repository.name }}/${{ matrix.image_name }}-${{ matrix.image_variant }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'

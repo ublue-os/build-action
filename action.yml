@@ -23,6 +23,10 @@ inputs:
   target:
     description: target to build in Containerfile
     required: true
+  container_registry:
+    description: registry to store resulting container
+    required: false
+    default: ghcr.io/${{ github.repository_owner }}
   container_repo:
     description: repository for the container image
     required: false
@@ -171,7 +175,7 @@ runs:
       id: registry_case
       uses: ASzc/change-string-case-action@v6
       with:
-        string: ghcr.io/${{ github.repository_owner }}
+        string: ${{ inputs.container_registry }}
 
     # Push the image to GHCR (Image Registry)
     - name: Push To GHCR
