@@ -52,14 +52,18 @@ jobs:
           container_repo: ublue-os/main
           container_ref: main
 
-      - uses: actions/delete-package-versions@v4
+      - name: Delete main packages
+        if: matrix.image_variant == 'main'
+        uses: actions/delete-package-versions@v4
         with: 
           package-name: ${{ matrix.image_name }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'
 
-      - uses: actions/delete-package-versions@v4
+      - name: Delete variant packages
+        if: matrix.image_variant != 'main'
+        uses: actions/delete-package-versions@v4
         with: 
           package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
           package-type: 'container'
@@ -110,14 +114,18 @@ jobs:
           container_repo: ublue-os/bluefin
           container_ref: main
       
-      - uses: actions/delete-package-versions@v4
+      - name: Delete main packages
+        if: matrix.image_variant == 'main'
+        uses: actions/delete-package-versions@v4
         with: 
           package-name: ${{ matrix.image_name }}
           package-type: 'container'
           min-versions-to-keep: 0
           delete-only-untagged-versions: 'false'
 
-      - uses: actions/delete-package-versions@v4
+      - name: Delete variant packages
+        if: matrix.image_variant != 'main'
+        uses: actions/delete-package-versions@v4
         with: 
           package-name: ${{ matrix.image_name }}-${{ matrix.image_variant }}
           package-type: 'container'

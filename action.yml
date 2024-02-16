@@ -130,7 +130,7 @@ runs:
       id: build_image
       uses: Wandalen/wretry.action@v1.4.4
       with:
-        uses: redhat-actions/buildah-build@v2
+        action: redhat-actions/buildah-build@v2
         with: |
           containerfiles: |
             ./Containerfile
@@ -179,7 +179,7 @@ runs:
         REGISTRY_PASSWORD: ${{ github.token }}
       uses: Wandalen/wretry.action@v1.4.4
       with:
-        uses: redhat-actions/push-to-registry@v2
+        action: redhat-actions/push-to-registry@v2
         with: |
           image: ${{ steps.build_image.outputs.image }}
           tags: ${{ steps.generate-tags.outputs.tags }}
