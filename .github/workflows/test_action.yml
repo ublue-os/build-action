@@ -49,6 +49,7 @@ jobs:
           version: ${{ matrix.major_version }}
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
+          target: ${{ matrix.image_variant }}
           container_repo: ublue-os/main
           container_ref: main
 
@@ -79,6 +80,7 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
         image_name:
           - bluefin
@@ -111,6 +113,7 @@ jobs:
           version: ${{ matrix.major_version }}
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
+          target: ${{ matrix.image_name }}
           container_repo: ublue-os/bluefin
           container_ref: main
       

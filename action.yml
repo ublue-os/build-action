@@ -19,6 +19,10 @@ inputs:
   signing_key:
     description: key to sign images
     required: true
+  #TODO: Split Containerfiles
+  target:
+    description: target to build in Containerfile
+    required: true
   container_repo:
     description: repository for the container image
     required: false
@@ -142,9 +146,9 @@ runs:
           TARGET_BASE=${{ inputs.image_variant }}
         labels: ${{ steps.meta.outputs.labels }}
         oci: false
-        #TODO: SPLIT Containerfiles
+        #TODO: Split Containerfiles
         extra-args: |
-          --target=${{ inputs.image_name }}
+          --target=${{ inputs.target }}
 
     - name: Get list of images to verify
       id: images_to_verify
