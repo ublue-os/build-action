@@ -42,17 +42,15 @@ jobs:
             major_version: 39
     steps:
       - name: Build image
-        uses: Wandalen/wretry.action@v1.4.4
+        uses: JasonN3/build-action@action
         with:
-          action: JasonN3/build-action@action
-          with: |
-            image_name: ${{ matrix.image_name }}
-            image_variant: ${{ matrix.image_variant }}
-            version: ${{ matrix.major_version }}
-            support: ${{ matrix.support }}
-            signing_key: ${{ secrets.SIGNING_SECRET }}
-            container_repo: ublue-os/main
-            container_ref: main
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          container_repo: ublue-os/main
+          container_ref: main
 
       - uses: actions/delete-package-versions@v4
         with: 
@@ -102,17 +100,15 @@ jobs:
             major_version: 39
     steps:
       - name: Build image
-        uses: Wandalen/wretry.action@v1.4.4
+        uses: JasonN3/build-action@action
         with:
-          action: JasonN3/build-action@action
-          with: |
-            image_name: ${{ matrix.image_name }}
-            image_variant: ${{ matrix.image_variant }}
-            version: ${{ matrix.major_version }}
-            support: ${{ matrix.support }}
-            signing_key: ${{ secrets.SIGNING_SECRET }}
-            container_repo: ublue-os/bluefin
-            container_ref: main
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          container_repo: ublue-os/bluefin
+          container_ref: main
       
       - uses: actions/delete-package-versions@v4
         with: 
