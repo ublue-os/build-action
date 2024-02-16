@@ -121,6 +121,7 @@ runs:
         containerfiles: |
           ./Containerfile
         image: ${{ steps.generate-name.outputs.image_name }}
+        tags: ${{ steps.generate-tags.outputs.tags }}
         build-args: |
           IMAGE_NAME=${{ inputs.image_name }}
           IMAGE_FLAVOR=${{ inputs.image_variant }}
