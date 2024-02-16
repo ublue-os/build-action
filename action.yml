@@ -16,6 +16,9 @@ inputs:
     description: latest, gts, or empty
     required: false
     default: ''
+  signing_key:
+    description: key to sign images
+    required: true
 
 runs:
   using: "composite"
@@ -185,4 +188,4 @@ runs:
       env:
         TAGS: ${{ steps.push.outputs.digest }}
         COSIGN_EXPERIMENTAL: "false"
-        COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+        COSIGN_PRIVATE_KEY: ${{ inputs.signing_key }}
