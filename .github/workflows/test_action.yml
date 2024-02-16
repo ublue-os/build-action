@@ -51,7 +51,7 @@ jobs:
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
           target: ${{ matrix.image_variant }}
-          container_registry: ghcr.io/${{ github.repo }}
+          container_registry: ghcr.io/${{ github.repository }}
           container_repo: ublue-os/main
           container_ref: main
 
@@ -107,6 +107,16 @@ jobs:
           - image_name: lxqt
             major_version: 39
     steps:
+      - name: Determine AKMODS_FLAVOR
+        run: |
+          if [[ "${{ matrix.image_flavor }}" =~ "asus" ]]; then
+              echo "AKMODS_FLAVOR=asus" >> $GITHUB_ENV
+          elif [[ "${{ matrix.image_flavor }}" =~ "surface" ]]; then
+              echo "AKMODS_FLAVOR=surface" >> $GITHUB_ENV
+          else
+              echo "AKMODS_FLAVOR=main" >> $GITHUB_ENV
+          fi
+
       - name: Build image
         uses: JasonN3/build-action@action
         with:
@@ -116,7 +126,9 @@ jobs:
           support: ${{ matrix.support }}
           signing_key: ${{ secrets.SIGNING_SECRET }}
           target: ${{ matrix.image_name }}
-          container_registry: ghcr.io/${{ github.repo }}
+          extra_build_args: |
+            AKMODS_FLAVOR=${{ env.AKMODS_FLAVOR }}
+          container_registry: ghcr.io/${{ github.repository }}
           container_repo: ublue-os/bluefin
           container_ref: main
       

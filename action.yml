@@ -16,6 +16,10 @@ inputs:
     description: latest, gts, or empty
     required: false
     default: ''
+  extra_build_args:
+    description: extra args to be passed to buildah
+    required: false
+    default: ''
   signing_key:
     description: key to sign images
     required: true
@@ -148,6 +152,7 @@ runs:
           IMAGE_VENDOR=${{ github.repository_owner }}
           FEDORA_MAJOR_VERSION=${{ inputs.version }}
           TARGET_BASE=${{ inputs.image_variant }}
+          ${{ inputs.extra_build_args }}
         labels: ${{ steps.meta.outputs.labels }}
         oci: false
         #TODO: Split Containerfiles
