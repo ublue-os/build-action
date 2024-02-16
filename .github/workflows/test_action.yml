@@ -42,7 +42,7 @@ jobs:
             major_version: 39
     steps:
       - name: Build image
-        uses: ${{ github.repo }}@${{ github.ref }}
+        uses: JasonN3/build-action@${{ github.ref }}
         with:
           image_name: ${{ matrix.image_name }}
           image_variant: ${{ matrix.image_variant }}
@@ -100,7 +100,7 @@ jobs:
             major_version: 39
     steps:
       - name: Build image
-        uses: ${{ github.repo }}@${{ github.ref }}
+        uses: JasonN3/build-action@${{ github.ref }}
         with:
           image_name: ${{ matrix.image_name }}
           image_variant: ${{ matrix.image_variant }}
