@@ -163,6 +163,8 @@ runs:
       id: images_to_verify
       shell: bash
       run: |
+        # grep may return 1 if no ublue images were used
+        set +o pipefail
         ublue_images=$(buildah images | tail -n +2 | grep -v localhost | awk '{print $1}' | grep '^ghcr.io/ublue-os' | tr '\n' ' ')
 
         echo "ublue_images=${ublue_images}" >> $GITHUB_OUTPUT
