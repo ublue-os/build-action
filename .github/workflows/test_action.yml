@@ -1,0 +1,173 @@
+name: Test container workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-main-build:
+    name: Build uBlue-OS Main
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        image_name:
+          - silverblue
+          - kinoite
+          - sericea
+          - onyx
+          - base
+          - lxqt
+          - lazurite
+          - mate
+          - vauxite
+        major_version:
+          - 39
+        image_variant: 
+          - nokmods
+        include:
+          - major_version: 39
+            support: latest
+          #- major_version: 38
+          #  support: gts
+        exclude:
+          # There is no Fedora 39 version of lxqt as it was replaced by lazurite
+          - image_name: lxqt
+            major_version: 39
+    steps:
+      - name: Build image
+        uses: JasonN3/build-action@action
+        with:
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          target: ${{ matrix.image_variant }}
+          container_registry: ghcr.io/${{ github.repository }}
+          container_repo: ublue-os/main
+          container_ref: main
+
+      - name: Delete main packages
+        run: |
+          if [[ "${{ matrix.image_variant }}" == "main" ]]
+          then
+            image_name=${{ matrix.image_name }}
+          elif [[ "${{ matrix.image_variant }}" =~ "main-*" ]]
+          then
+            variant=${{ matrix.image_variant }}
+            image_name=${{ matrix.image_name }}-${variant:5}
+          else
+            image_name=${{ format('{0}-{1}', matrix.image_name, matrix.image_variant) }}
+          fi
+          curl -L \
+            -X DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/user/packages/container/${{ github.event.repository.name }}/${image_name}
+
+  run-bluefin-build:
+    name: Build uBlue-OS Bluefin
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        image_name:
+          - bluefin
+          - bluefin-dx
+        major_version:
+          - 39
+        image_variant:
+          - main
+          - nvidia
+          - asus
+          - asus-nvidia
+          - framework
+          - surface
+          - surface-nvidia
+        include:
+          - major_version: 39
+            support: latest
+          #- major_version: 38
+          #  support: gts
+        exclude:
+          # There is no Fedora 39 version of lxqt as it was replaced by lazurite
+          - image_name: lxqt
+            major_version: 39
+    steps:
+      - name: Determine AKMODS_FLAVOR
+        run: |
+          if [[ "${{ matrix.image_variant }}" =~ ^asus* ]]; then
+              echo "AKMODS_FLAVOR=asus" >> $GITHUB_ENV
+          elif [[ "${{ matrix.image_variant }}" =~ ^surface* ]]; then
+              echo "AKMODS_FLAVOR=surface" >> $GITHUB_ENV
+          else
+              echo "AKMODS_FLAVOR=main" >> $GITHUB_ENV
+          fi
+
+      - name: Build image
+        uses: JasonN3/build-action@action
+        with:
+          image_name: ${{ matrix.image_name }}
+          image_variant: ${{ matrix.image_variant }}
+          version: ${{ matrix.major_version }}
+          support: ${{ matrix.support }}
+          signing_key: ${{ secrets.SIGNING_SECRET }}
+          target: ${{ matrix.image_name }}
+          extra_build_args: |
+            AKMODS_FLAVOR=${{ env.AKMODS_FLAVOR }}
+          container_registry: ghcr.io/${{ github.repository }}
+          container_repo: ublue-os/bluefin
+          container_ref: main
+      
+      - name: Delete main packages
+        run: |
+          if [[ "${{ matrix.image_variant }}" == "main" ]]
+          then
+            image_name=${{ matrix.image_name }}
+          elif [[ "${{ matrix.image_variant }}" =~ "main-*" ]]
+          then
+            variant=${{ matrix.image_variant }}
+            image_name=${{ matrix.image_name }}-${variant:5}
+          else
+            image_name=${{ format('{0}-{1}', matrix.image_name, matrix.image_variant) }}
+          fi
+          curl -L \
+            -X DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/users/${{ github.repository_owner }}/packages/container/${{ github.event.repository.name }}%2F${image_name}
+
+  check:
+    name: Check build successful
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    needs:
+      - run-main-build
+      - run-bluefin-build
+    steps:
+      - name: Exit on failure for main
+        if: ${{ needs.run-main-build.result == 'failure' || needs.run-main-build.result == 'skipped' }}
+        shell: bash
+        run: exit 1
+      - name: Exit on failure for bluefin
+        if: ${{ needs.run-bluefin-build.result == 'failure' || needs.run-bluefin-build.result == 'skipped' }}
+        shell: bash
+        run: exit 1
+      - name: Exit
+        shell: bash
+        run: exit 0
