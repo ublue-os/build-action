@@ -110,9 +110,9 @@ jobs:
     steps:
       - name: Determine AKMODS_FLAVOR
         run: |
-          if [[ "${{ matrix.image_flavor }}" =~ "asus" ]]; then
+          if [[ "${{ matrix.image_variant }}" =~ ^asus* ]]; then
               echo "AKMODS_FLAVOR=asus" >> $GITHUB_ENV
-          elif [[ "${{ matrix.image_flavor }}" =~ "surface" ]]; then
+          elif [[ "${{ matrix.image_variant }}" =~ ^surface* ]]; then
               echo "AKMODS_FLAVOR=surface" >> $GITHUB_ENV
           else
               echo "AKMODS_FLAVOR=main" >> $GITHUB_ENV
