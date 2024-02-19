@@ -43,7 +43,7 @@ jobs:
             major_version: 39
     steps:
       - name: Build image
-        uses: JasonN3/build-action@action
+        uses: ./
         with:
           image_name: ${{ matrix.image_name }}
           image_variant: ${{ matrix.image_variant }}
