@@ -26,7 +26,8 @@ inputs:
   #TODO: Split Containerfiles
   target:
     description: target to build in Containerfile
-    required: true
+    required: false
+    default: main
   container_registry:
     description: registry to store resulting container
     required: false
@@ -39,6 +40,10 @@ inputs:
     description: repository ref for the container image
     required: false
     default: ${{ github.ref }}
+  push_container:
+    description: whether to push the resulting container image
+    required: false
+    default: "true"
 
 runs:
   using: "composite"
@@ -86,7 +91,7 @@ runs:
       shell: bash
       run: |
         # Run on main
-        if [[ ${{ github.event_name }} != 'pull_request' && ${{ github.base_ref }} == ${{ github.event.repository.default_branch }} ]]
+        if [[ ${{ github.event_name }} != 'pull_request' && ${{ github.ref }} == ${{ github.event.repository.default_branch }} ]]
         then
           BUILD_TAG="${{ inputs.version }}"
           COMMIT_TAGS=()
@@ -187,6 +192,7 @@ runs:
     # Push the image to GHCR (Image Registry)
     - name: Push To GHCR
       id: push
+      if: inputs.push_container == 'true'
       env:
         REGISTRY_USER: ${{ github.actor }}
         REGISTRY_PASSWORD: ${{ github.token }}
@@ -200,7 +206,7 @@ runs:
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
-      if: github.event_name == 'push' && github.base_ref == github.event.repository.default_branch
+      if: inputs.push_container == 'true' && github.event_name == 'push' && github.ref == github.event.repository.default_branch
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -208,11 +214,11 @@ runs:
 
     # Sign container
     - uses: sigstore/cosign-installer@v3.4.0
-      if: github.event_name == 'push' && github.base_ref == github.event.repository.default_branch
+      if: inputs.push_container == 'true' && github.event_name == 'push' && github.ref == github.event.repository.default_branch
 
     - name: Sign container image
       shell: bash
-      if: github.event_name == 'push' && github.base_ref == github.event.repository.default_branch
+      if: inputs.push_container == 'true' && github.event_name == 'push' && github.ref == github.event.repository.default_branch
       run: |
         cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ steps.registry_case.outputs.lowercase }}/${{ steps.build_image.outputs.image }}@${TAGS}
       env:
