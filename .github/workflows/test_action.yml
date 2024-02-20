@@ -60,6 +60,11 @@ jobs:
           container_ref: main
           push_container: "false"
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
   run-bluefin-build:
     name: Build uBlue-OS Bluefin
     continue-on-error: false
@@ -123,6 +128,11 @@ jobs:
           container_repo: ublue-os/bluefin
           container_ref: main
           push_container: "false"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
   check:
     name: Check build successful
