@@ -182,15 +182,26 @@ runs:
         # grep may return 1 if no ublue images were used
         set +o pipefail
         ublue_images=$(buildah images | tail -n +2 | grep -v localhost | awk '{print $1}' | grep '^ghcr.io/ublue-os' | tr '\n' ' ')
+        chainguard_images=$(buildah images | tail -n +2 | grep -v localhost | awk '{print $1}' | grep '^cgr.dev/chainguard' | tr '\n' ' ')
 
         echo "ublue_images=${ublue_images}" >> $GITHUB_OUTPUT
+        echo "chainguard_images=${chainguard_images}" >> $GITHUB_OUTPUT
 
     - name: Verify base image
+      if: ${{ steps.images_to_verify.output.ublue_images }} != ''
       uses: EyeCantCU/cosign-action/verify@v0.2.2
       with:
         containers: ${{ steps.images_to_verify.output.ublue_images }}
         pubkey: https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub
-
+    
+    - name: Verify chainguard images
+      if: ${{ steps.images_to_verify.output.chainguard_images }} != ''
+      uses: EyeCantCU/cosign-action/verify@v0.2.2
+      with:
+        containers: ${{ steps.images_to_verify.output.chainguard_images }}
+        cert-identity: https://github.com/chainguard-images/images/.github/workflows/release.yaml@refs/heads/main
+        oidc-issuer: https://token.actions.githubusercontent.com
+        registry: cgr.dev/chainguard
 
     # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
     # https://github.com/macbre/push-to-ghcr/issues/12
